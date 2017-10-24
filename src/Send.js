@@ -405,9 +405,9 @@ export default class Send extends React.Component {
           style={styles.photoButton}
           onPress={() => this.handlePhotoButton()}
         >
-        */}
           <Icon1 name={'camera'} size={20} color="gray" align='right'/>
         </TouchableOpacity>
+        */}
       </View>
     );
   }
