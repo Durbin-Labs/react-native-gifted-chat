@@ -78,14 +78,27 @@ export default class Send extends React.Component {
     },(error,res) => {
       if(res == null) console.log("Kichui Select Korinai!");
       // Android
-      // if(res.uri!=null){
-        // console.log(
-        //   res.uri,
-        //   res.type,
-        //   res.fileName,
-        //   res.fileSize
-        // );
-      //}
+      if(res.uri!=null){
+        console.log(
+          res.uri,
+          res.type,
+          res.fileName,
+          res.fileSize
+        );
+
+        // handle send
+        console.log(res)
+        //this.props.onSend({text: this.props.text.trim(), url: res.uri, filetype: 'doc', fileName: res.fileName}, true)
+        Alert.alert(
+          'Confirm upload',
+          'Please press Ok to confirm',
+          [
+            {text: 'Cancel', onPress: () =>{console.log("cancelled upload")} },
+            {text: 'OK', onPress: () => this.props.onSend({text: this.props.text.trim(), url: res.uri, filetype: 'doc', fileName: res.fileName}, true)},
+          ],
+          { cancelable: false }
+        )
+      }
     });
   }
 
@@ -117,13 +130,27 @@ export default class Send extends React.Component {
       }
       else {
         let source = { uri: response.uri };
+        // this.props.onSend({text: this.props.text.trim(), url: response.uri, filetype: 'image'}, true)
 
         // You can also display the image using data:
         // let source = { uri: 'data:image/jpeg;base64,' + response.data };
 
-        this.setState({
-          avatarSource: source
-        });
+        // this.setState({
+        //   avatarSource: source
+        // }, ()=>{
+        //   console.log("from setstate callback........")
+        //   this.props.onSend({text: this.props.text.trim(), url: this.state.avatarSource}, true)
+          Alert.alert(
+            'Confirm upload',
+            'Please press Ok to confirm',
+            [
+              {text: 'Cancel', onPress: () =>{console.log("cancelled upload")} },
+              {text: 'OK', onPress: () => this.props.onSend({text: this.props.text.trim(), url: response.uri, filetype: 'image'}, true)},
+            ],
+            { cancelable: false }
+          )
+          // console.log(this.state.avatarSource)
+        // });
       }
     });
   }
@@ -217,15 +244,16 @@ export default class Send extends React.Component {
   }
 
   async _stop() {
-    if (!this.state.recording) {
-      console.warn('Can\'t stop, not recording!');
-      return;
-    }
+    // if (!this.state.recording) {
+    //   console.warn('Can\'t stop, not recording!');
+    //   return;
+    // }
 
     this.setState({stoppedRecording: true, recording: false, currentTime: 0.0});
 
     try {
       const filePath = await AudioRecorder.stopRecording();
+      console.log(filePath)
 
       if (Platform.OS === 'android') {
         this._finishRecording(true, filePath);
@@ -237,9 +265,9 @@ export default class Send extends React.Component {
   }
 
   async _play() {
-    if (this.state.recording) {
-      await this._stop();
-    }
+    // if (this.state.recording) {
+    //   await this._stop();
+    // }
 
     this.setState({playing: true});
     // These timeouts are a hacky workaround for some issues with react-native-sound.
@@ -261,6 +289,13 @@ export default class Send extends React.Component {
         });
       }, 100);
     }, 100);
+  }
+
+  sendAudioFile(){
+    // send audio file
+    console.log("sending file to our function........", this.state.modalVisible)
+    this.props.onSend({text: this.props.text.trim(), url: 'file://' + this.state.audioPath, filetype: 'audio'}, true)
+    this.setModalVisible(!this.state.modalVisible)
   }
 
   async _record() {
@@ -339,54 +374,18 @@ export default class Send extends React.Component {
                 :
                 <View style={{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                   {this._renderButton("PLAY", () => {this._play()})}
-                  {this._renderButton("SEND", () => alert("This Function is not available!") )}
+                  {this._renderButton("SEND", () => {this.sendAudioFile(this)} )}
                   {this._renderButton(" CANCEL", () => this.setModalVisible(!this.state.modalVisible))}
                 </View>
               }
-
-              
               
             </View>
           </Modal>
         </View>
 
-        <View>
-          <Modal
-            animationType={"slide"}
-            transparent={false}
-            visible={this.state.modalVisible2}
-            onRequestClose={() => {
-              this.setModalVisible2(!this.state.modalVisible2)}
-            }
-          >
-            <View style={styles.container2}>
-              <TouchableOpacity onPress={this.selectPhotoTapped.bind(this)}>
-                <View style={[styles.avatar, styles.avatarContainer, {marginBottom: 20}]}>
-                { this.state.avatarSource === null ? <Icon1 name={'camera'} size={70} color="gray" align='right'/> :
-                  <Image style={styles.avatar} source={this.state.avatarSource} />
-                }
-                </View>
-              </TouchableOpacity>
-              <View
-                style = {{marginBottom: 30}}
-              />
-              <TouchableOpacity onPress={this.selectVideoTapped.bind(this)}>
-                <View style={[styles.avatar, styles.avatarContainer]}>
-                  <Icon1 name={'video-camera'} size={70} color="gray" align='right'/>
-                </View>
-              </TouchableOpacity>
-
-              { this.state.videoSource &&
-                <Text style={{margin: 8, textAlign: 'center'}}>{this.state.videoSource}</Text>
-              }
-
-
-            </View>
-          </Modal>
-        </View>
         
         {/*-------------------------------------- uraniumreza ----------------------------------------------*/}
-        {/*
+        
         <TouchableOpacity 
           style={styles.micButton}
           onPress={() => this.handleMicButton()}
@@ -403,11 +402,11 @@ export default class Send extends React.Component {
 
         <TouchableOpacity 
           style={styles.photoButton}
-          onPress={() => this.handlePhotoButton()}
+          onPress={this.selectPhotoTapped.bind(this)}
         >
           <Icon1 name={'camera'} size={20} color="gray" align='right'/>
         </TouchableOpacity>
-        */}
+        
       </View>
     );
   }
