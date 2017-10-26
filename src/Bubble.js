@@ -11,18 +11,32 @@ import {
   ScrollView,
   Image,
   TouchableHighlight,
-  ToastAndroid,
-  
+  ToastAndroid
 } from 'react-native';
 
-import {Button, Item, Input} from 'native-base';
+import { Button, Item, Input } from 'native-base';
 import Meteor from 'react-native-meteor';
 
 import Icon2 from 'react-native-vector-icons/Ionicons';
-export const RANKS = ['NULL', 'Second Lieutenant', 'Lieutenant', 'Captain', 'Major', 'Lieutenant Colonel', 'Colonel', 'Brigadier General', 'Warrant Officer', 'Senior Warrant Officer', 'Master Warrant Officer', 'Honorary Lieutenant', 'Honorary Captain' ];
+export const RANKS = [
+  'NULL',
+  'Second Lieutenant',
+  'Lieutenant',
+  'Captain',
+  'Major',
+  'Lieutenant Colonel',
+  'Colonel',
+  'Brigadier General',
+  'Warrant Officer',
+  'Senior Warrant Officer',
+  'Master Warrant Officer',
+  'Honorary Lieutenant',
+  'Honorary Captain'
+];
 
 import MessageText from './MessageText';
 import MessageImage from './MessageImage';
+import MessageFile from './MessageFile';
 import Time from './Time';
 
 import { isSameUser, isSameDay, warnDeprecated } from './utils';
@@ -32,87 +46,108 @@ export default class Bubble extends React.Component {
     super(props);
     this.onLongPress = this.onLongPress.bind(this);
 
-    this.state= {
+    this.state = {
       contacts: null,
       resultFound: null,
       modalVisible: false,
       searchString: '',
-      messageString: '',
-    }
+      messageString: ''
+    };
   }
 
   setModalVisible(visible) {
-    this.setState({modalVisible: visible});
+    this.setState({ modalVisible: visible });
   }
 
   handleBubbleToNext() {
-    if (isSameUser(this.props.currentMessage, this.props.nextMessage) && isSameDay(this.props.currentMessage, this.props.nextMessage)) {
-      return StyleSheet.flatten([styles[this.props.position].containerToNext, this.props.containerToNextStyle[this.props.position]]);
+    if (
+      isSameUser(this.props.currentMessage, this.props.nextMessage) &&
+      isSameDay(this.props.currentMessage, this.props.nextMessage)
+    ) {
+      return StyleSheet.flatten([
+        styles[this.props.position].containerToNext,
+        this.props.containerToNextStyle[this.props.position]
+      ]);
     }
     return null;
   }
 
   handleBubbleToPrevious() {
-    if (isSameUser(this.props.currentMessage, this.props.previousMessage) && isSameDay(this.props.currentMessage, this.props.previousMessage)) {
-      return StyleSheet.flatten([styles[this.props.position].containerToPrevious, this.props.containerToPreviousStyle[this.props.position]]);
+    if (
+      isSameUser(this.props.currentMessage, this.props.previousMessage) &&
+      isSameDay(this.props.currentMessage, this.props.previousMessage)
+    ) {
+      return StyleSheet.flatten([
+        styles[this.props.position].containerToPrevious,
+        this.props.containerToPreviousStyle[this.props.position]
+      ]);
     }
     return null;
   }
 
   renderMessageText() {
     if (this.props.currentMessage.text) {
-      const {containerStyle, wrapperStyle, ...messageTextProps} = this.props;
+      const { containerStyle, wrapperStyle, ...messageTextProps } = this.props;
       if (this.props.renderMessageText) {
         return this.props.renderMessageText(messageTextProps);
       }
-      return <MessageText {...messageTextProps}/>;
+      return <MessageText {...messageTextProps} />;
     }
     return null;
   }
 
   renderMessageImage() {
     if (this.props.currentMessage.image) {
-      const {containerStyle, wrapperStyle, ...messageImageProps} = this.props;
+      const { containerStyle, wrapperStyle, ...messageImageProps } = this.props;
       if (this.props.renderMessageImage) {
         return this.props.renderMessageImage(messageImageProps);
       }
-      return <MessageImage {...messageImageProps}/>;
-    }
-    return null;
-  }
-
-  renderTicks() {
-    const {currentMessage} = this.props;
-    if (this.props.renderTicks) {
-        return this.props.renderTicks(currentMessage);
-    }
-    if (currentMessage.user._id !== this.props.user._id) {
-        return;
-    }
-    if (currentMessage.sent || currentMessage.received) {
-      return (
-        <View style={styles.tickView}>
-          {currentMessage.sent && <Text style={[styles.tick, this.props.tickStyle]}>✓</Text>}
-          {currentMessage.received && <Text style={[styles.tick, this.props.tickStyle]}>✓</Text>}
-        </View>
-      )
-    }
-  }
-
-  renderTime() {
-    if (this.props.currentMessage.createdAt) {
-      const {containerStyle, wrapperStyle, ...timeProps} = this.props;
-      if (this.props.renderTime) {
-        return this.props.renderTime(timeProps);
-      }
-      return <Time {...timeProps}/>;
+      return <MessageImage {...messageImageProps} />;
     }
     return null;
   }
 
   renderCustomView() {
-    if (this.props.renderCustomView) {
-      return this.props.renderCustomView(this.props);
+    if (this.props.currentMessage.file) {
+      const { containerStyle, wrapperStyle, ...messageImageProps } = this.props;
+      if (this.props.renderCustomView) {
+        return this.props.renderCustomView(messageImageProps);
+      }
+
+      return <MessageFile {...messageImageProps} />;
+    }
+    return null;
+  }
+
+  renderTicks() {
+    const { currentMessage } = this.props;
+    if (this.props.renderTicks) {
+      return this.props.renderTicks(currentMessage);
+    }
+    if (currentMessage.user._id !== this.props.user._id) {
+      return;
+    }
+    if (currentMessage.sent || currentMessage.received) {
+      return (
+        <View style={styles.tickView}>
+          {currentMessage.sent && (
+            <Text style={[styles.tick, this.props.tickStyle]}>✓</Text>
+          )}
+          {currentMessage.received && (
+            <Text style={[styles.tick, this.props.tickStyle]}>✓</Text>
+          )}
+        </View>
+      );
+    }
+  }
+
+  renderTime() {
+    if (this.props.currentMessage.createdAt) {
+      const { containerStyle, wrapperStyle, ...timeProps } = this.props;
+      if (this.props.renderTime) {
+        return this.props.renderTime(timeProps);
+      }
+      return <Time {...timeProps} />;
     }
     return null;
   }
@@ -122,21 +157,17 @@ export default class Bubble extends React.Component {
       this.props.onLongPress(this.context, this.props.currentMessage);
     } else {
       if (this.props.currentMessage.text) {
-        const options = [
-          'Forward',
-          'Copy',
-          'Cancel',
-        ];
+        const options = ['Forward', 'Copy', 'Cancel'];
         const cancelButtonIndex = options.length - 1;
         this.context.actionSheet().showActionSheetWithOptions({
           options,
-          cancelButtonIndex,
+          cancelButtonIndex
         },
-        (buttonIndex) => {
+        buttonIndex => {
           switch (buttonIndex) {
             case 0:
               this.setModalVisible(!this.state.modalVisible);
-              this.setState({messageString: this.props.currentMessage.text});
+              this.setState({ messageString: this.props.currentMessage.text });
               break;
             case 1:
               Clipboard.setString(this.props.currentMessage.text);
@@ -147,23 +178,22 @@ export default class Bubble extends React.Component {
     }
   }
 
-
   // -------------------------------------- uraniumreza ----------------------------------------------
 
   fetchContactsList() {
     let context = this;
-    Meteor.call("get.friendList", function(error, result){
-      if(error){
+    Meteor.call('get.friendList', function(error, result) {
+      if (error) {
         //console.log("Mara Khaiche: ", error);
-        context.setState({failed: true});
+        context.setState({ failed: true });
       }
-      if(result){
+      if (result) {
         //console.log("Message er vitore: ", result);
         var id = Meteor.user()._id;
 
-        for(i=0; i<result.length; i++){
+        for (i = 0; i < result.length; i++) {
           //console.log(result[i]);
-          if(id == result[i]._id){
+          if (id == result[i]._id) {
             result.splice(i, 1);
           }
         }
@@ -172,56 +202,70 @@ export default class Bubble extends React.Component {
 
         let key = context.state.searchString;
         let j = 0;
-        for(i=0; i<result.length; i++){
-          console.log(key, result[i].profile.name.indexOf(key), result[i].profile.name);
-          if(result[i].profile.name.toLowerCase().indexOf(key) !== -1){
+        for (i = 0; i < result.length; i++) {
+          console.log(
+            key,
+            result[i].profile.name.indexOf(key),
+            result[i].profile.name
+          );
+          if (result[i].profile.name.toLowerCase().indexOf(key) !== -1) {
             newResult[j] = result[i];
             j++;
           }
-        }        
+        }
 
-        newResult.sort(function(a, b){
-          var nameA = a.profile.name.toLowerCase(), nameB = b.profile.name.toLowerCase()
-          if (nameA < nameB) //sort string ascending
-              return -1 
-          if (nameA > nameB)
-              return 1
-          return 0 //default return value (no sorting)
-        })
+        newResult.sort(function(a, b) {
+          var nameA = a.profile.name.toLowerCase(),
+            nameB = b.profile.name.toLowerCase();
+          if (nameA < nameB)
+            //sort string ascending
+            return -1;
+          if (nameA > nameB) return 1;
+          return 0; //default return value (no sorting)
+        });
 
         //console.log(result);
-        context.setState({contacts: newResult});
+        context.setState({ contacts: newResult });
       }
     });
   }
 
-  sendMessage(id){
+  sendMessage(id) {
     let context = this;
-    console.log("sendMessage Functionality er jonno button pressed: ", context.state.messageString),
-    
-    Meteor.call("get.chatId", id, function(error, result){
-      if(error){
-        console.log("Mara Khaiche Message button e chapar pore: ", error);
-      }
-      if(result){
-        console.log("Chat ID paichi vai dekhen: ", result);
-        data = {
-          chatId: result, 
-          senderId: Meteor.user()._id, 
-          message: context.state.messageString,
+    console.log(
+      'sendMessage Functionality er jonno button pressed: ',
+      context.state.messageString
+    ),
+      Meteor.call('get.chatId', id, function(error, result) {
+        if (error) {
+          console.log('Mara Khaiche Message button e chapar pore: ', error);
         }
+        if (result) {
+          console.log('Chat ID paichi vai dekhen: ', result);
+          data = {
+            chatId: result,
+            senderId: Meteor.user()._id,
+            message: context.state.messageString
+          };
 
-        Meteor.call('add.chatMessage', data, (err,res)=>{
-          if(err){
-              alert("Sorry! Message was not sent");
-          }
-          if(res){
-            console.log("Okay Bhai Message Forward Korte parchi.. Check koren giya! ", res);
-          }
-        })
-      }
-    })
-    ToastAndroid.showWithGravity('Message has been forwarded!', ToastAndroid.SHORT, ToastAndroid.CENTER);
+          Meteor.call('add.chatMessage', data, (err, res) => {
+            if (err) {
+              alert('Sorry! Message was not sent');
+            }
+            if (res) {
+              console.log(
+                'Okay Bhai Message Forward Korte parchi.. Check koren giya! ',
+                res
+              );
+            }
+          });
+        }
+      });
+    ToastAndroid.showWithGravity(
+      'Message has been forwarded!',
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    );
     this.setModalVisible(!this.state.modalVisible);
   }
 
@@ -233,92 +277,126 @@ export default class Bubble extends React.Component {
     let collection2 = [];
     let data;
     let context = this;
-    if(this.state.contacts){
-      this.state.contacts.map(function (obj, index) {
-        collection2[index] =
-        <TouchableHighlight
-          underlayColor = {'transparent'}
-          key={index}
-          onPress={() => context.sendMessage(obj._id)}
-        >
-          <View key={index} style={{backgroundColor: 'transparent',}}>
-            <View style={styles.containerStyle}>
-              <View style={styles.imageViewStyle}>
-                <Image
-                  style={styles.imageStyle}
-                  source={{uri: 'http://durbintest.pro/images/pp.jpg'}}
-                />
+    if (this.state.contacts) {
+      this.state.contacts.map(function(obj, index) {
+        collection2[index] = (
+          <TouchableHighlight
+            underlayColor={'transparent'}
+            key={index}
+            onPress={() => context.sendMessage(obj._id)}
+          >
+            <View key={index} style={{ backgroundColor: 'transparent' }}>
+              <View style={styles.containerStyle}>
+                <View style={styles.imageViewStyle}>
+                  <Image
+                    style={styles.imageStyle}
+                    source={{ uri: 'http://durbintest.pro/images/pp.jpg' }}
+                  />
+                </View>
+                <View style={styles.textStyle}>
+                  <Text style={styles.nameStyle}>{obj.profile.name}</Text>
+                  <Text style={styles.titleStyle}>
+                    {RANKS[obj.profile.rank]}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.textStyle}>
-                <Text style={styles.nameStyle}>{obj.profile.name}</Text>
-                <Text style={styles.titleStyle}>{RANKS[obj.profile.rank]}</Text>
-              </View>
-            </View>
 
-            <View
-              style={{
-                opacity: .7,
-                alignItems: 'center',
-                flexDirection: 'column',
-                justifyContent: 'space-around',
-                borderBottomWidth: 1,
-                borderBottomColor: 'grey',
-                alignSelf: 'stretch',
-                marginRight: 35,
-                marginLeft: 107,
-              }}
-            />
-          </View>
-        </TouchableHighlight>
+              <View
+                style={{
+                  opacity: 0.7,
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  justifyContent: 'space-around',
+                  borderBottomWidth: 1,
+                  borderBottomColor: 'grey',
+                  alignSelf: 'stretch',
+                  marginRight: 35,
+                  marginLeft: 107
+                }}
+              />
+            </View>
+          </TouchableHighlight>
+        );
       });
     }
 
     // -------------------------------------- uraniumreza ----------------------------------------------
 
     return (
-      <View style={[styles[this.props.position].container, this.props.containerStyle[this.props.position]]}>
-        
+      <View
+        style={[
+          styles[this.props.position].container,
+          this.props.containerStyle[this.props.position]
+        ]}
+      >
         {/*-------------------------------------- uraniumreza ----------------------------------------------*/}
-        
+
         <View>
           <Modal
-            animationType={"slide"}
+            animationType={'slide'}
             transparent={false}
             visible={this.state.modalVisible}
             onRequestClose={() => {
-              this.setModalVisible(!this.state.modalVisible)}}
+              this.setModalVisible(!this.state.modalVisible);
+            }}
           >
-
-            <View style={{flex: 1, backgroundColor: '#FFFFFF'}}>
-              <View style={{marginTop: 10, marginLeft: 20, flexDirection: 'row', justifyContent: 'center'}}>
+            <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+              <View
+                style={{
+                  marginTop: 10,
+                  marginLeft: 20,
+                  flexDirection: 'row',
+                  justifyContent: 'center'
+                }}
+              >
                 <View>
-                  <Item rounded style={{marginTop: 20, height: 50, width: 250}}>
-                      <Input
-                        placeholder='Contact Name'
-                        style={{opacity: 0.7, fontSize:16, color: 'gray'}}
-                        value={this.state.searchString}
-                        onChangeText={searchString => this.setState({searchString})}
-                      />
+                  <Item
+                    rounded
+                    style={{ marginTop: 20, height: 50, width: 250 }}
+                  >
+                    <Input
+                      placeholder="Contact Name"
+                      style={{ opacity: 0.7, fontSize: 16, color: 'gray' }}
+                      value={this.state.searchString}
+                      onChangeText={searchString =>
+                        this.setState({ searchString })}
+                    />
                   </Item>
                 </View>
 
                 <View>
-                  <Button rounded style={styles.buttonStyle} onPress={this.fetchContactsList.bind(this)}>
-                    <Icon2 name='ios-search' size={30} color="white" align='center'/>
+                  <Button
+                    rounded
+                    style={styles.buttonStyle}
+                    onPress={this.fetchContactsList.bind(this)}
+                  >
+                    <Icon2
+                      name="ios-search"
+                      size={30}
+                      color="white"
+                      align="center"
+                    />
                   </Button>
                 </View>
               </View>
 
-              <ScrollView style={{paddingTop: 5, paddingBottom: 10,}}>
+              <ScrollView style={{ paddingTop: 5, paddingBottom: 10 }}>
                 {collection2}
               </ScrollView>
             </View>
           </Modal>
         </View>
-        
+
         {/*-------------------------------------- uraniumreza ----------------------------------------------*/}
 
-        <View style={[styles[this.props.position].wrapper, this.props.wrapperStyle[this.props.position], this.handleBubbleToNext(), this.handleBubbleToPrevious()]}>
+        <View
+          style={[
+            styles[this.props.position].wrapper,
+            this.props.wrapperStyle[this.props.position],
+            this.handleBubbleToNext(),
+            this.handleBubbleToPrevious()
+          ]}
+        >
           <TouchableWithoutFeedback
             onLongPress={this.onLongPress}
             accessibilityTraits="text"
@@ -328,7 +406,12 @@ export default class Bubble extends React.Component {
               {this.renderCustomView()}
               {this.renderMessageImage()}
               {this.renderMessageText()}
-              <View style={[styles.bottom, this.props.bottomContainerStyle[this.props.position]]}>
+              <View
+                style={[
+                  styles.bottom,
+                  this.props.bottomContainerStyle[this.props.position]
+                ]}
+              >
                 {this.renderTime()}
                 {this.renderTicks()}
               </View>
@@ -344,13 +427,13 @@ const styles = {
   containerStyle: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-start'
   },
   titleStyle: {
     fontFamily: 'Roboto',
     fontSize: 13,
-    color: "grey",
-    paddingTop: 8,
+    color: 'grey',
+    paddingTop: 8
   },
   imageStyle: {
     flex: 1,
@@ -359,7 +442,7 @@ const styles = {
     width: 70,
     borderRadius: 75,
     borderWidth: 0,
-    borderColor: '#FFFFFF',
+    borderColor: '#FFFFFF'
   },
   imageViewStyle: {
     height: 72,
@@ -370,18 +453,18 @@ const styles = {
     backgroundColor: '#FFFFFF',
     marginLeft: 20,
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 10
   },
   textStyle: {
     alignItems: 'flex-start',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    paddingLeft: 15,
+    paddingLeft: 15
   },
   nameStyle: {
     fontFamily: 'Roboto_medium',
     fontSize: 18,
-    color: "grey",
+    color: 'grey'
   },
   buttonStyle: {
     opacity: 1,
@@ -397,65 +480,65 @@ const styles = {
     borderColor: '#5F9EA0',
     shadowColor: 'gray',
     shadowOpacity: 0.2,
-    shadowOffset: {height: .5, width: 1},
+    shadowOffset: { height: 0.5, width: 1 },
     elevation: 1.5
   },
 
   left: StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'flex-start',
+      alignItems: 'flex-start'
     },
     wrapper: {
       borderRadius: 15,
       backgroundColor: '#f0f0f0',
       marginRight: 60,
       minHeight: 20,
-      justifyContent: 'flex-end',
+      justifyContent: 'flex-end'
     },
     containerToNext: {
-      borderBottomLeftRadius: 3,
+      borderBottomLeftRadius: 3
     },
     containerToPrevious: {
-      borderTopLeftRadius: 3,
-    },
+      borderTopLeftRadius: 3
+    }
   }),
   right: StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'flex-end',
+      alignItems: 'flex-end'
     },
     wrapper: {
       borderRadius: 15,
       backgroundColor: '#0084ff',
       marginLeft: 60,
       minHeight: 20,
-      justifyContent: 'flex-end',
+      justifyContent: 'flex-end'
     },
     containerToNext: {
-      borderBottomRightRadius: 3,
+      borderBottomRightRadius: 3
     },
     containerToPrevious: {
-      borderTopRightRadius: 3,
-    },
+      borderTopRightRadius: 3
+    }
   }),
   bottom: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end'
   },
   tick: {
     fontSize: 10,
     backgroundColor: 'transparent',
-    color: 'white',
+    color: 'white'
   },
   tickView: {
     flexDirection: 'row',
-    marginRight: 10,
+    marginRight: 10
   }
 };
 
 Bubble.contextTypes = {
-  actionSheet: PropTypes.func,
+  actionSheet: PropTypes.func
 };
 
 Bubble.defaultProps = {
@@ -469,7 +552,7 @@ Bubble.defaultProps = {
   currentMessage: {
     text: null,
     createdAt: null,
-    image: null,
+    image: null
   },
   nextMessage: {},
   previousMessage: {},
@@ -481,7 +564,7 @@ Bubble.defaultProps = {
   containerToPreviousStyle: {},
   //TODO: remove in next major release
   isSameDay: warnDeprecated(isSameDay),
-  isSameUser: warnDeprecated(isSameUser),
+  isSameUser: warnDeprecated(isSameUser)
 };
 
 Bubble.propTypes = {
@@ -497,26 +580,26 @@ Bubble.propTypes = {
   previousMessage: PropTypes.object,
   containerStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   wrapperStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   bottomContainerStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   tickStyle: Text.propTypes.style,
   containerToNextStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   containerToPreviousStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   //TODO: remove in next major release
   isSameDay: PropTypes.func,
-  isSameUser: PropTypes.func,
+  isSameUser: PropTypes.func
 };
