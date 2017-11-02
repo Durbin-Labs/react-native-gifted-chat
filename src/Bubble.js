@@ -109,12 +109,12 @@ export default class Bubble extends React.Component {
 
   renderCustomView() {
     if (this.props.currentMessage.file) {
-      const { containerStyle, wrapperStyle, ...messageImageProps } = this.props;
+      const { containerStyle, wrapperStyle, ...messageFileProps } = this.props;
       if (this.props.renderCustomView) {
-        return this.props.renderCustomView(messageImageProps);
+        return this.props.renderCustomView(messageFileProps);
       }
 
-      return <MessageFile {...messageImageProps} />;
+      return <MessageFile {...messageFileProps} />;
     }
     return null;
   }

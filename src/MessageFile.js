@@ -6,12 +6,13 @@ import {
   View,
   Text,
   ViewPropTypes,
-  Linking
+  Linking,
+  ToastAndroid
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import Sound from 'react-native-sound';
 
-export default class MessageImage extends React.Component {
+export default class MessageFile extends React.Component {
   constructor(props) {
     super(props);
 
@@ -24,24 +25,27 @@ export default class MessageImage extends React.Component {
   async _play() {
     console.log('Play Button Pressed...');
     this.setState({ playing: true });
+    console.log(this.state.audioPath);
     // These timeouts are a hacky workaround for some issues with react-native-sound.
     // See https://github.com/zmxv/react-native-sound/issues/89.
     setTimeout(() => {
+      ToastAndroid.show('Voice Message is Loading...', ToastAndroid.SHORT);
       var sound = new Sound(this.state.audioPath, '', error => {
         if (error) {
           console.log('failed to load the sound', error);
+        } else {
+          setTimeout(() => {
+            sound.play(success => {
+              if (success) {
+                this.setState({ playing: false });
+                console.log('successfully finished playing');
+              } else {
+                console.log('playback failed due to audio decoding errors');
+              }
+            });
+          }, 100);
         }
       });
-      setTimeout(() => {
-        sound.play(success => {
-          if (success) {
-            this.setState({ playing: false });
-            console.log('successfully finished playing');
-          } else {
-            console.log('playback failed due to audio decoding errors');
-          }
-        });
-      }, 100);
     }, 100);
   }
 
@@ -72,28 +76,23 @@ export default class MessageImage extends React.Component {
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: 20,
-                width: 20,
+                height: 25,
+                width: 25,
                 borderWidth: 1,
-                borderColor: '#004212',
-                borderRadius: 10
+                borderColor: iconColor[this.props.position],
+                borderRadius: 13
               }}
             >
               <Icon
                 name={'attachment'}
-                size={12}
-                color="#004212"
+                size={15}
+                color={iconColor[this.props.position]}
                 align="right"
               />
             </View>
 
             <Text
-              style={{
-                color: '#004212',
-                fontSize: 16,
-                fontStyle: 'italic',
-                marginLeft: 5
-              }}
+              style={styles[this.props.position].text}
               onPress={() => Linking.openURL(this.props.currentMessage.file)}
             >
               Attached File
@@ -117,41 +116,32 @@ export default class MessageImage extends React.Component {
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: 20,
-                width: 20,
+                height: 25,
+                width: 25,
                 borderWidth: 1,
-                borderColor: '#004212',
-                borderRadius: 10
+                borderColor: iconColor[this.props.position],
+                borderRadius: 13
               }}
             >
               {this.state.playing ? (
                 <Icon
                   name={'controller-paus'}
-                  size={12}
-                  color="#004212"
-                  align="right"
+                  size={15}
+                  color={iconColor[this.props.position]}
+                  align="center"
                 />
               ) : (
                 <Icon
                   onPress={this._play.bind(this)}
                   name={'controller-play'}
-                  size={12}
-                  color="#004212"
-                  align="right"
+                  size={15}
+                  color={iconColor[this.props.position]}
+                  align="center"
                 />
               )}
             </View>
 
-            <Text
-              style={{
-                color: '#004212',
-                fontSize: 16,
-                fontStyle: 'italic',
-                marginLeft: 5
-              }}
-            >
-              Voice Message
-            </Text>
+            <Text style={styles[this.props.position].text}>Voice Message</Text>
           </View>
         )}
       </View>
@@ -159,22 +149,52 @@ export default class MessageImage extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {},
-  image: {
-    width: 150,
-    height: 100,
-    borderRadius: 13,
-    margin: 3,
-    resizeMode: 'cover'
-  },
-  imageActive: {
-    flex: 1,
-    resizeMode: 'contain'
-  }
-});
+const iconColor = {
+  right: 'white',
+  left: '#004212'
+};
 
-MessageImage.defaultProps = {
+const textStyle = {
+  fontSize: 18,
+  fontStyle: 'italic',
+  lineHeight: 20,
+  marginLeft: 5,
+  marginRight: 5
+};
+
+const styles = {
+  left: StyleSheet.create({
+    container: {},
+    text: {
+      color: '#004212',
+      ...textStyle
+    },
+    link: {
+      color: '#004212',
+      textDecorationLine: 'underline'
+    },
+    icon: {
+      color: '#004212'
+    }
+  }),
+  right: StyleSheet.create({
+    container: {},
+    text: {
+      color: 'white',
+      ...textStyle
+    },
+    link: {
+      color: 'white',
+      textDecorationLine: 'underline'
+    },
+    icon: {
+      color: 'white'
+    }
+  })
+};
+
+MessageFile.defaultProps = {
+  position: 'left',
   currentMessage: {
     image: null
   },
@@ -182,11 +202,11 @@ MessageImage.defaultProps = {
   imageStyle: {}
 };
 
-MessageImage.propTypes = {
+MessageFile.propTypes = {
+  position: PropTypes.oneOf(['left', 'right']),
   currentMessage: PropTypes.object,
   containerStyle: ViewPropTypes.style,
   imageStyle: Image.propTypes.style,
   imageProps: PropTypes.object,
   lightboxProps: PropTypes.object
 };
-

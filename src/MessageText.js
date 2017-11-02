@@ -1,12 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  Linking,
-  StyleSheet,
-  Text,
-  View,
-  ViewPropTypes,
-} from 'react-native';
+import { Linking, StyleSheet, Text, View, ViewPropTypes } from 'react-native';
 
 import ParsedText from 'react-native-parsed-text';
 import Communications from 'react-native-communications';
@@ -27,7 +21,7 @@ export default class MessageText extends React.Component {
     if (WWW_URL_PATTERN.test(url)) {
       this.onUrlPress(`http://${url}`);
     } else {
-      Linking.canOpenURL(url).then((supported) => {
+      Linking.canOpenURL(url).then(supported => {
         if (!supported) {
           console.error('No handler for URL:', url);
         } else {
@@ -38,17 +32,13 @@ export default class MessageText extends React.Component {
   }
 
   onPhonePress(phone) {
-    const options = [
-      'Call',
-      'Text',
-      'Cancel',
-    ];
+    const options = ['Call', 'Text', 'Cancel'];
     const cancelButtonIndex = options.length - 1;
     this.context.actionSheet().showActionSheetWithOptions({
       options,
-      cancelButtonIndex,
+      cancelButtonIndex
     },
-    (buttonIndex) => {
+    buttonIndex => {
       switch (buttonIndex) {
         case 0:
           Communications.phonecall(phone, true);
@@ -65,16 +55,27 @@ export default class MessageText extends React.Component {
   }
 
   render() {
-    const linkStyle = StyleSheet.flatten([styles[this.props.position].link, this.props.linkStyle[this.props.position]]);
+    const linkStyle = StyleSheet.flatten([
+      styles[this.props.position].link,
+      this.props.linkStyle[this.props.position]
+    ]);
     return (
-      <View style={[styles[this.props.position].container, this.props.containerStyle[this.props.position]]}>
+      <View
+        style={[
+          styles[this.props.position].container,
+          this.props.containerStyle[this.props.position]
+        ]}
+      >
         <ParsedText
-          style={[styles[this.props.position].text, this.props.textStyle[this.props.position]]}
+          style={[
+            styles[this.props.position].text,
+            this.props.textStyle[this.props.position]
+          ]}
           parse={[
             ...this.props.parsePatterns(linkStyle),
-            {type: 'url', style: linkStyle, onPress: this.onUrlPress},
-            {type: 'phone', style: linkStyle, onPress: this.onPhonePress},
-            {type: 'email', style: linkStyle, onPress: this.onEmailPress},
+            { type: 'url', style: linkStyle, onPress: this.onUrlPress },
+            { type: 'phone', style: linkStyle, onPress: this.onPhonePress },
+            { type: 'email', style: linkStyle, onPress: this.onEmailPress }
           ]}
         >
           {this.props.currentMessage.text}
@@ -90,49 +91,47 @@ const textStyle = {
   marginTop: 5,
   marginBottom: 5,
   marginLeft: 10,
-  marginRight: 10,
+  marginRight: 10
 };
 
 const styles = {
   left: StyleSheet.create({
-    container: {
-    },
+    container: {},
     text: {
-      color: 'black',
-      ...textStyle,
+      color: '#004212',
+      ...textStyle
     },
     link: {
-      color: 'black',
-      textDecorationLine: 'underline',
-    },
+      color: '#004212',
+      textDecorationLine: 'underline'
+    }
   }),
   right: StyleSheet.create({
-    container: {
-    },
+    container: {},
     text: {
       color: 'white',
-      ...textStyle,
+      ...textStyle
     },
     link: {
       color: 'white',
-      textDecorationLine: 'underline',
-    },
-  }),
+      textDecorationLine: 'underline'
+    }
+  })
 };
 
 MessageText.contextTypes = {
-  actionSheet: PropTypes.func,
+  actionSheet: PropTypes.func
 };
 
 MessageText.defaultProps = {
   position: 'left',
   currentMessage: {
-    text: '',
+    text: ''
   },
   containerStyle: {},
   textStyle: {},
   linkStyle: {},
-  parsePatterns: () => [],
+  parsePatterns: () => []
 };
 
 MessageText.propTypes = {
@@ -140,15 +139,15 @@ MessageText.propTypes = {
   currentMessage: PropTypes.object,
   containerStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   textStyle: PropTypes.shape({
     left: Text.propTypes.style,
-    right: Text.propTypes.style,
+    right: Text.propTypes.style
   }),
   linkStyle: PropTypes.shape({
     left: Text.propTypes.style,
-    right: Text.propTypes.style,
+    right: Text.propTypes.style
   }),
-  parsePatterns: PropTypes.func,
+  parsePatterns: PropTypes.func
 };

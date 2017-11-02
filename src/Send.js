@@ -12,7 +12,8 @@ import {
   Platform,
   PermissionsAndroid,
   PixelRatio,
-  Image
+  Image,
+  ToastAndroid
 } from 'react-native';
 var ImagePicker = require('react-native-image-picker');
 import Sound from 'react-native-sound';
@@ -70,43 +71,19 @@ export default class Send extends React.Component {
         if (res == null) console.log('Kichui Select Korinai!');
         // Android
         if (res.uri != null) {
-          console.log(res.uri, res.type, res.fileName, res.fileSize);
-          // handle send
-          // console.log(res);
-          // this.props.onSend(
-          //   {
-          //     text: this.props.text.trim(),
-          //     url: res.uri,
-          //     filetype: 'doc',
-          //     fileName: res.fileName
-          //   },
-          //   true
-          // );
-          Alert.alert(
-            'Confirm upload',
-            'Please press OK to confirm',
-            [
-              {
-                text: 'Cancel',
-                onPress: () => {
-                  console.log('cancelled upload');
-                }
-              },
-              {
-                text: 'OK',
-                onPress: () =>
-                  this.props.onSend(
-                    {
-                      text: this.props.text.trim(),
-                      url: res.uri,
-                      filetype: 'doc',
-                      fileName: res.fileName
-                    },
-                    true
-                  )
-              }
-            ],
-            { cancelable: false }
+          //console.log(res.uri, res.type, res.fileName, res.fileSize);
+          ToastAndroid.show(
+            res.fileName + ' is Sending...',
+            ToastAndroid.SHORT
+          );
+          this.props.onSend(
+            {
+              text: this.props.text.trim(),
+              url: res.uri,
+              filetype: 'doc',
+              fileName: res.fileName
+            },
+            true
           );
         }
       }
@@ -134,17 +111,10 @@ export default class Send extends React.Component {
         console.log('User tapped custom button: ', response.customButton);
       } else {
         let source = { uri: response.uri };
-        // this.props.onSend({text: this.props.text.trim(), url: response.uri, filetype: 'image'}, true)
-        // You can also display the image using data:
-        // let source = { uri: 'data:image/jpeg;base64,' + response.data };
-        // this.setState({
-        //   avatarSource: source
-        // }, ()=>{
-        //   console.log("from setstate callback........")
-        //   this.props.onSend({text: this.props.text.trim(), url: this.state.avatarSource}, true)
+
         Alert.alert(
           'Confirm upload',
-          'Please press Ok to confirm',
+          'Please press OK to confirm',
           [
             {
               text: 'Cancel',
@@ -270,23 +240,26 @@ export default class Send extends React.Component {
     //   await this._stop();
     // }
     this.setState({ playing: true });
+    //console.log(this.state.audioPath);
     // These timeouts are a hacky workaround for some issues with react-native-sound.
     // See https://github.com/zmxv/react-native-sound/issues/89.
     setTimeout(() => {
+      ToastAndroid.show('Voice Message is Loading...', ToastAndroid.SHORT);
       var sound = new Sound(this.state.audioPath, '', error => {
         if (error) {
           console.log('failed to load the sound', error);
+        } else {
+          setTimeout(() => {
+            sound.play(success => {
+              if (success) {
+                console.log('successfully finished playing');
+              } else {
+                console.log('playback failed due to audio decoding errors');
+              }
+            });
+          }, 100);
         }
       });
-      setTimeout(() => {
-        sound.play(success => {
-          if (success) {
-            console.log('successfully finished playing');
-          } else {
-            console.log('playback failed due to audio decoding errors');
-          }
-        });
-      }, 100);
     }, 100);
   }
   sendAudioFile() {
