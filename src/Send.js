@@ -68,9 +68,9 @@ export default class Send extends React.Component {
         filetype: [DocumentPickerUtil.allFiles()]
       },
       (error, res) => {
-        if (res == null) console.log('Kichui Select Korinai!');
+        if (res === null) console.log('Kichui Select Korinai!');
         // Android
-        if (res.uri != null) {
+        if (res != null) {
           //console.log(res.uri, res.type, res.fileName, res.fileSize);
           ToastAndroid.show(
             res.fileName + ' is Sending...',
