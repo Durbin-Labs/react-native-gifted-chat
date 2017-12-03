@@ -13,14 +13,14 @@ import {
   PermissionsAndroid,
   PixelRatio,
   Image,
-  ToastAndroid
+  ToastAndroid,
 } from 'react-native';
 var ImagePicker = require('react-native-image-picker');
 import Sound from 'react-native-sound';
 import { AudioRecorder, AudioUtils } from 'react-native-audio';
 import {
   DocumentPicker,
-  DocumentPickerUtil
+  DocumentPickerUtil,
 } from 'react-native-document-picker';
 import { Button, Item, Input } from 'native-base';
 import Icon1 from 'react-native-vector-icons/Entypo';
@@ -31,8 +31,8 @@ var options = {
   customButtons: [{ name: 'fb', title: 'Choose Photo from Facebook' }],
   storageOptions: {
     skipBackup: true,
-    path: 'images'
-  }
+    path: 'images',
+  },
 };
 export default class Send extends React.Component {
   constructor(props) {
@@ -48,7 +48,7 @@ export default class Send extends React.Component {
       audioPath: AudioUtils.DocumentDirectoryPath + '/test.aac',
       hasPermission: undefined,
       modalVisible: false,
-      modalVisible2: false
+      modalVisible2: false,
     };
   }
   setModalVisible(visible) {
@@ -62,83 +62,93 @@ export default class Send extends React.Component {
     this.setModalVisible(!this.state.modalVisible);
   }
   handleAttachmentButton() {
-    console.log('Kichui hoynai bhai ohono! Wait koren..');
+    // console.log('Kichui hoynai bhai ohono! Wait koren..');
     DocumentPicker.show(
       {
-        filetype: [DocumentPickerUtil.allFiles()]
+        filetype: [DocumentPickerUtil.allFiles()],
       },
       (error, res) => {
         if (res === null) console.log('Kichui Select Korinai!');
         // Android
-        if (res != null) {
+        if (res !== null) {
           //console.log(res.uri, res.type, res.fileName, res.fileSize);
-          ToastAndroid.show(
-            res.fileName + ' is Sending...',
-            ToastAndroid.SHORT
-          );
+          ToastAndroid.show(res.fileName + ' is Sending...', ToastAndroid.LONG);
           this.props.onSend(
             {
               text: this.props.text.trim(),
               url: res.uri,
               filetype: 'doc',
-              fileName: res.fileName
+              fileName: res.fileName,
             },
-            true
+            true,
           );
         }
-      }
+      },
     );
   }
   handlePhotoButton() {
     this.setModalVisible2(!this.state.modalVisible2);
   }
+
   selectPhotoTapped() {
     const options = {
       quality: 1.0,
       maxWidth: 500,
       maxHeight: 500,
       storageOptions: {
-        skipBackup: true
-      }
+        skipBackup: true,
+      },
     };
     ImagePicker.showImagePicker(options, response => {
       console.log('Response = ', response);
       if (response.didCancel) {
+        ToastAndroid.show('User cancelled photo picker!', ToastAndroid.SHORT);
         console.log('User cancelled photo picker');
       } else if (response.error) {
+        message = 'ImagePicker Error: ' + response.error;
+        ToastAndroid.show(message, ToastAndroid.SHORT);
         console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
+        message = 'User tapped custom button: ' + response.customButton;
+        ToastAndroid.show(message, ToastAndroid.SHORT);
         console.log('User tapped custom button: ', response.customButton);
       } else {
+        // ToastAndroid.show(response.uri, ToastAndroid.SHORT);
         let source = { uri: response.uri };
-
-        Alert.alert(
-          'Confirm upload',
-          'Please press OK to confirm',
-          [
-            {
-              text: 'Cancel',
-              onPress: () => {
-                console.log('cancelled upload');
-              }
-            },
-            {
-              text: 'OK',
-              onPress: () =>
-                this.props.onSend(
-                  {
-                    text: this.props.text.trim(),
-                    url: response.uri,
-                    filetype: 'image'
-                  },
-                  true
-                )
-            }
-          ],
-          { cancelable: false }
+        this.props.onSend(
+          {
+            text: this.props.text.trim(),
+            url: response.uri,
+            filetype: 'image',
+          },
+          true,
         );
-        // console.log(this.state.avatarSource)
-        // });
+        // Alert.alert(
+        //   'Confirm picture upload',
+        //   'Please press OK to confirm',
+        //   [
+        //     {
+        //       text: 'Cancel',
+        //       onPress: () => {
+        //         console.log('cancelled upload');
+        //       },
+        //     },
+        //     {
+        //       text: 'OK',
+        //       onPress: () =>
+        //         this.props.onSend(
+        //           {
+        //             text: this.props.text.trim(),
+        //             url: response.uri,
+        //             filetype: 'image',
+        //           },
+        //           true,
+        //         ),
+        //     },
+        //   ],
+        //   { cancelable: false },
+        // );
+        ToastAndroid.show('Picture is uploading...', ToastAndroid.LONG);
       }
     });
   }
@@ -147,7 +157,7 @@ export default class Send extends React.Component {
       title: 'Video Picker',
       takePhotoButtonTitle: 'Take Video',
       mediaType: 'mixed',
-      videoQuality: 'high'
+      videoQuality: 'high',
     };
     ImagePicker.showImagePicker(options, response => {
       console.log('Response = ', response);
@@ -159,7 +169,7 @@ export default class Send extends React.Component {
         console.log('User tapped custom button: ', response.customButton);
       } else {
         this.setState({
-          videoSource: response.uri
+          videoSource: response.uri,
         });
       }
     });
@@ -170,7 +180,7 @@ export default class Send extends React.Component {
       Channels: 1,
       AudioQuality: 'High',
       AudioEncoding: 'aac',
-      AudioEncodingBitRate: 32000
+      AudioEncodingBitRate: 32000,
     });
   }
   componentDidMount() {
@@ -196,11 +206,11 @@ export default class Send extends React.Component {
     const rationale = {
       title: 'Microphone Permission',
       message:
-        'AudioExample needs access to your microphone so you can record audio.'
+        'AudioExample needs access to your microphone so you can record audio.',
     };
     return PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      rationale
+      rationale,
     ).then(result => {
       console.log('Permission result:', result);
       return result === true || result === PermissionsAndroid.RESULTS.GRANTED;
@@ -222,7 +232,7 @@ export default class Send extends React.Component {
     this.setState({
       stoppedRecording: true,
       recording: false,
-      currentTime: 0.0
+      currentTime: 0.0,
     });
     try {
       const filePath = await AudioRecorder.stopRecording();
@@ -266,15 +276,15 @@ export default class Send extends React.Component {
     // send audio file
     console.log(
       'sending file to our function........',
-      this.state.modalVisible
+      this.state.modalVisible,
     );
     this.props.onSend(
       {
         text: this.props.text.trim(),
         url: 'file://' + this.state.audioPath,
-        filetype: 'audio'
+        filetype: 'audio',
       },
-      true
+      true,
     );
     this.setModalVisible(!this.state.modalVisible);
   }
@@ -300,8 +310,9 @@ export default class Send extends React.Component {
   _finishRecording(didSucceed, filePath) {
     this.setState({ finished: didSucceed });
     console.log(
-      `Finished recording of duration ${this.state
-        .currentTime} seconds at path: ${filePath}`
+      `Finished recording of duration ${
+        this.state.currentTime
+      } seconds at path: ${filePath}`,
     );
   }
   // shouldComponentUpdate(nextProps, nextState) {
@@ -357,7 +368,7 @@ export default class Send extends React.Component {
                   style={{
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
                   }}
                 >
                   {this._renderButton('PLAY', () => {
@@ -367,7 +378,7 @@ export default class Send extends React.Component {
                     this.sendAudioFile(this);
                   })}
                   {this._renderButton(' CANCEL', () =>
-                    this.setModalVisible(!this.state.modalVisible)
+                    this.setModalVisible(!this.state.modalVisible),
                   )}
                 </View>
               )}
@@ -405,42 +416,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF'
+    backgroundColor: '#F5FCFF',
   },
   avatarContainer: {
     borderColor: '#9B9B9B',
     borderWidth: 3 / PixelRatio.get(),
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   avatar: {
     borderRadius: 75,
     width: 150,
-    height: 150
+    height: 150,
   },
   controls: {
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1
+    flex: 1,
   },
   progressText: {
     paddingBottom: 50,
     fontSize: 100,
-    color: 'gray'
+    color: 'gray',
   },
   button: {
-    padding: 20
+    padding: 20,
   },
   disabledButtonText: {
-    color: '#eee'
+    color: '#eee',
   },
   buttonText: {
     fontSize: 20,
-    color: 'gray'
+    color: 'gray',
   },
   activeButtonText: {
     fontSize: 20,
-    color: '#B81F00'
+    color: '#B81F00',
   },
   micButton: {
     height: 30,
@@ -450,7 +461,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     bottom: 8,
-    right: 10
+    right: 10,
   },
   attachmentButton: {
     marginRight: 30,
@@ -461,7 +472,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     bottom: 8,
-    right: 10
+    right: 10,
   },
   photoButton: {
     marginRight: 65,
@@ -472,11 +483,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     bottom: 8,
-    right: 10
+    right: 10,
   },
   container: {
     height: 44,
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
   },
   text: {
     color: '#0084ff',
@@ -485,20 +496,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginBottom: 12,
     marginLeft: 10,
-    marginRight: 10
-  }
+    marginRight: 10,
+  },
 });
 Send.defaultProps = {
   text: '',
   onSend: () => {},
   label: 'SEND',
   containerStyle: {},
-  textStyle: {}
+  textStyle: {},
 };
 Send.propTypes = {
   text: PropTypes.string,
   onSend: PropTypes.func,
   label: PropTypes.string,
   containerStyle: ViewPropTypes.style,
-  textStyle: Text.propTypes.style
+  textStyle: Text.propTypes.style,
 };
